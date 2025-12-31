@@ -37,31 +37,122 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
   DateTime? birthDate;
   String result = '';
 
+  final TextEditingController _dateInputController = TextEditingController();
+
   /// Memformat tanggal menjadi string yang mudah dibaca
   String formatDate(DateTime date) {
-    return '${date.day}-${date.month}-${date.year}';
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
+
+  DateTime? _parseDate(String value) {
+    try {
+      final parts = value.split('/');
+      if (parts.length != 3) return null;
+
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+
+      return DateTime(year, month, day);
+    } catch (_) {
+      return null;
+    }
   }
 
   // Functions
 
   // Date picker untuk memilih tanggal lahir
-  Future<void> pickDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: birthDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      helpText: 'Pilih Tanggal Lahir',
-      cancelText: 'Batal',
-      confirmText: 'Pilih',
-    );
+  // Future<void> pickDate() async {
+  //   final DateTime? picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: birthDate ?? DateTime.now(),
+  //     firstDate: DateTime(1900),
+  //     lastDate: DateTime.now(),
+  //     helpText: 'Pilih Tanggal Lahir',
+  //     cancelText: 'Batal',
+  //     confirmText: 'Pilih',
+  //   );
 
-    if (picked != null) {
-      setState(() {
-        birthDate = picked;
-        result = ''; // Reset hasil saat tanggal berubah
-      });
+  //   if (picked != null) {
+  //     setState(() {
+  //       birthDate = picked;
+  //       result = ''; // Reset hasil saat tanggal berubah
+  //     });
+  //   }
+  // }
+
+  void _formatDateInput(String value) {
+    String digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+    String formatted = '';
+
+    if (digits.length >= 2) {
+      formatted = digits.substring(0, 2);
+    } else {
+      formatted = digits;
     }
+
+    if (digits.length >= 4) {
+      formatted += '/${digits.substring(2, 4)}';
+    } else if (digits.length > 2) {
+      formatted += '/${digits.substring(2)}';
+    }
+
+    if (digits.length >= 8) {
+      formatted += '/${digits.substring(4, 8)}';
+    } else if (digits.length > 4) {
+      formatted += '/${digits.substring(4)}';
+    }
+
+    _dateInputController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  Future<void> _openCustomDatePicker() async {
+    _dateInputController.clear();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Masukkan Tanggal Lahir'),
+          content: TextField(
+            controller: _dateInputController,
+            keyboardType: TextInputType.number,
+            maxLength: 10,
+            decoration: const InputDecoration(
+              hintText: 'DD/MM/YYYY',
+              counterText: '',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: _formatDateInput,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final parsedDate = _parseDate(_dateInputController.text);
+
+                if (parsedDate != null) {
+                  setState(() {
+                    birthDate = parsedDate;
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Hitung umur berdasarkan tanggal lahir
@@ -246,7 +337,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton.icon(
-        onPressed: pickDate,
+        onPressed: _openCustomDatePicker,
         icon: const Icon(Icons.date_range_rounded, size: 24),
         label: const Text(
           'Pilih Tanggal Lahir',
@@ -266,7 +357,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       ),
     );
   }
-  
+
   /// Tombol untuk menghitung umur
   Widget _buildCalculateButton() {
     final bool isEnabled = birthDate != null;
@@ -302,7 +393,6 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: _buildDrawer(),
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
@@ -326,216 +416,6 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
             _buildCalculateButton(),
             const SizedBox(height: 24),
             _buildResultCard(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: Column(
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.indigo.shade600,
-            ),
-            child: const Align(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          // ABOUT
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
-            onTap: () {
-              Navigator.pop(context); // tutup drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AboutPage(),
-                ),
-              );
-            },
-          ),
-
-          const Divider(),
-
-          // KELUAR
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Keluar'),
-            onTap: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AboutPage extends StatelessWidget {
-  const AboutPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'About',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // HEADER
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.indigo.shade500,
-                    Colors.purple.shade400,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Column(
-                children: [
-                  Icon(
-                    Icons.cake_rounded,
-                    size: 56,
-                    color: Colors.white,
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'Age Calculator',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Aplikasi Penghitung Umur',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // CARD DESKRIPSI
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tentang Aplikasi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      'Age Calculator adalah aplikasi sederhana yang '
-                      'digunakan untuk menghitung umur seseorang '
-                      'berdasarkan tanggal lahir secara akurat '
-                      'menggunakan framework Flutter.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // CARD INFO PEMBUAT
-            Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.indigo.shade100,
-                      child: Icon(
-                        Icons.person,
-                        size: 32,
-                        color: Colors.indigo.shade600,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dibuat oleh',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Arkan Isa Alvaro',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'XI PPLG',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
