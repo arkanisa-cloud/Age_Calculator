@@ -13,10 +13,10 @@ class MyApp extends StatelessWidget {
       title: 'Age Calculator',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
+        primarySwatch: Colors.blue,
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
+          seedColor: const Color(0xFF4A90E2), // Bright blue from cake frosting
           brightness: Brightness.light,
         ),
       ),
@@ -100,19 +100,52 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
+              shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [Colors.indigo.shade100, Colors.purple.shade100],
+                colors: [
+                  Colors.white,
+                  const Color(0xFFF8F8F8),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF4A90E2).withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: const Color(0xFFC2185B).withOpacity(0.15),
+                  blurRadius: 15,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 0,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                  spreadRadius: -2,
+                ),
+              ],
             ),
-            child: Icon(
-              Icons.cake_rounded,
-              size: 48,
-              color: Colors.indigo.shade600,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 3,
+                ),
+              ),
+              child: Image.asset(
+                'images/cake.png',
+                width: 72,
+                height: 72,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -137,6 +170,57 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
     );
   }
 
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Color(0xFF4A90E2),
+            ),
+            child: const Align(
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+
+          // ABOUT
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            onTap: () {
+              Navigator.pop(context); // tutup drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AboutPage(),
+                ),
+              );
+            },
+          ),
+
+          const Divider(),
+
+          // KELUAR
+          ListTile(
+            leading: const Icon(Icons.exit_to_app),
+            title: const Text('Keluar'),
+            onTap: () {
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Card untuk menampilkan tanggal lahir yang dipilih
   Widget _buildBirthDateCard() {
     return Card(
@@ -153,7 +237,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
               children: [
                 Icon(
                   Icons.calendar_today_rounded,
-                  color: Colors.indigo.shade600,
+                  color: const Color(0xFF4A90E2), // Bright blue
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -199,7 +283,10 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.indigo.shade50, Colors.purple.shade50],
+            colors: [
+              const Color(0xFFF5E6D3), // Light cream/beige
+              const Color(0xFFE8F4FD), // Very light blue
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -212,7 +299,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
               Icon(
                 Icons.celebration_rounded,
                 size: 48,
-                color: Colors.indigo.shade600,
+                color: const Color(0xFFFFC107), // Yellow from cake plate
               ),
               const SizedBox(height: 16),
               const Text(
@@ -229,7 +316,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.indigo.shade700,
+                  color: const Color(0xFFC2185B), // Dark pink/magenta
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -256,7 +343,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.indigo.shade600,
+          backgroundColor: const Color(0xFF4A90E2), // Bright blue
           foregroundColor: Colors.white,
           elevation: 3,
           shape: RoundedRectangleBorder(
@@ -266,7 +353,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       ),
     );
   }
-  
+
   /// Tombol untuk menghitung umur
   Widget _buildCalculateButton() {
     final bool isEnabled = birthDate != null;
@@ -285,7 +372,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple.shade600,
+          backgroundColor: const Color(0xFFC2185B), // Dark pink/magenta
           foregroundColor: Colors.white,
           disabledBackgroundColor: Colors.grey.shade300,
           disabledForegroundColor: Colors.grey.shade500,
@@ -303,7 +390,7 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: _buildDrawer(),
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: const Color(0xFFFAF8F5), // Warm cream background
       appBar: AppBar(
         title: const Text(
           'Age Calculator',
@@ -311,6 +398,8 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
         ),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: const Color(0xFFFAF8F5), // Match background
+        foregroundColor: const Color(0xFF2C2C2C), // Dark text
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -331,57 +420,6 @@ class _AgeCalculatorPageState extends State<AgeCalculatorPage> {
       ),
     );
   }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: Column(
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.indigo.shade600,
-            ),
-            child: const Align(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          // ABOUT
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
-            onTap: () {
-              Navigator.pop(context); // tutup drawer
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AboutPage(),
-                ),
-              );
-            },
-          ),
-
-          const Divider(),
-
-          // KELUAR
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Keluar'),
-            onTap: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class AboutPage extends StatelessWidget {
@@ -390,7 +428,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Color(0xFFFAF8F5), // Warm cream background
       appBar: AppBar(
         title: const Text(
           'About',
@@ -408,22 +446,16 @@ class AboutPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.indigo.shade500,
-                    Colors.purple.shade400,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: const Color(0xFF4A90E2), // Bright blue
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(
-                    Icons.cake_rounded,
-                    size: 56,
-                    color: Colors.white,
+                  Image.asset(
+                    'images/cake.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
                   ),
                   SizedBox(height: 12),
                   Text(
